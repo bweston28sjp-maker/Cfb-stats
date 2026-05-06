@@ -1,79 +1,36 @@
-index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CFB STATS // GRIDIRON CENTRAL</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<title>CFB Stats Dashboard</title>
 
 <style>
-:root {
-  --black:#0B0B0B;
-  --gold:#D4AF37;
-  --charcoal:#1A1A1A;
-  --text:#F5F5F5;
-  --text-dim:rgba(245,245,245,0.45);
-  --border:rgba(212,175,55,0.2);
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-
 body{
-  background:var(--black);
-  color:var(--text);
-  font-family:Barlow,sans-serif;
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0b0b0b;
+  color:white;
 }
 
-/* HEADER */
 header{
+  padding:18px;
+  background:#111;
+  border-bottom:2px solid #d4af37;
   display:flex;
   justify-content:space-between;
-  padding:16px 24px;
-  border-bottom:1px solid var(--border);
 }
 
-.logo{
-  font-family:"Bebas Neue";
-  color:var(--gold);
-  font-size:28px;
-  letter-spacing:3px;
+h1{color:#d4af37;margin:0}
+
+.container{padding:20px}
+
+input{
+  padding:10px;
+  width:260px;
+  margin-bottom:15px;
 }
 
-/* HERO */
-.hero{
-  padding:24px;
-  border-bottom:2px solid var(--gold);
-}
-.hero h1{
-  font-family:"Bebas Neue";
-  font-size:48px;
-}
-.hero span{color:var(--gold)}
-
-/* CONTROLS */
-.controls{
-  padding:16px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-button{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:6px 12px;
-  cursor:pointer;
-}
-
-button.active{
-  background:var(--gold);
-  color:black;
-}
-
-/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
@@ -82,104 +39,58 @@ table{
 th,td{
   padding:10px;
   border-bottom:1px solid #222;
-  font-size:13px;
 }
 
 th{
-  color:var(--gold);
+  color:#d4af37;
   cursor:pointer;
 }
 
-/* PLAYER */
-.player{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.avatar{
-  width:28px;height:28px;
-  background:var(--gold);
-  color:black;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-}
-
-/* FOOTER */
-footer{
-  padding:16px;
-  color:var(--text-dim);
-  border-top:1px solid var(--border);
-  margin-top:20px;
-}
+tr:hover{background:#1a1a1a}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">GRIDIRON CENTRAL</div>
-  <div>CFB STATS</div>
+<h1>GRIDIRON CENTRAL</h1>
+<div>CFB STATS</div>
 </header>
 
-<div class="hero">
-  <h1>COLLEGE FOOTBALL <span>STATS</span></h1>
-</div>
+<div class="container">
 
-<div class="controls">
-  <button class="active" onclick="setCat('passing')">Passing</button>
-  <button onclick="setCat('rushing')">Rushing</button>
-  <button onclick="setCat('receiving')">Receiving</button>
-  <input id="search" placeholder="Search player..." oninput="render()" style="padding:6px">
-</div>
+<input id="search" placeholder="Search player..." oninput="render()">
 
 <table>
-<thead id="head"></thead>
+<thead>
+<tr>
+<th onclick="sort('player')">Player</th>
+<th onclick="sort('team')">Team</th>
+<th onclick="sort('yds')">YDS</th>
+<th onclick="sort('td')">TD</th>
+</tr>
+</thead>
 <tbody id="body"></tbody>
 </table>
 
-<footer>
-  Live NCAA-style stats dashboard prototype
-</footer>
+</div>
 
 <script>
 
-/* ================= DATA ================= */
-
-const DATA = {
-passing:[
-{player:"Caleb Williams",team:"USC",yds:3633,td:37,int:5},
-{player:"Bo Nix",team:"Oregon",yds:4045,td:45,int:3},
-{player:"Jayden Daniels",team:"LSU",yds:3812,td:40,int:4}
-],
-rushing:[
-{player:"Ollie Gordon",team:"OKST",yds:1732,td:21},
-{player:"Blake Corum",team:"Michigan",yds:1247,td:27}
-],
-receiving:[
-{player:"Marvin Harrison Jr",team:"OSU",yds:1211,td:14},
+const DATA = [
+{player:"Caleb Williams",team:"USC",yds:3633,td:37},
+{player:"Bo Nix",team:"Oregon",yds:4045,td:45},
+{player:"Jayden Daniels",team:"LSU",yds:3812,td:40},
+{player:"Marvin Harrison Jr",team:"Ohio State",yds:1211,td:14},
 {player:"Rome Odunze",team:"Washington",yds:1640,td:13}
-]
-};
+];
 
-let cat="passing";
 let sortKey=null;
 let dir=-1;
 
-/* ================= LOGIC ================= */
-
-function setCat(c){
-cat=c;
-document.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-event.target.classList.add("active");
-render();
-}
-
 function getData(){
-let d=[...DATA[cat]];
 let q=document.getElementById("search").value.toLowerCase();
+let d=[...DATA];
 
 if(q) d=d.filter(p=>p.player.toLowerCase().includes(q));
 
@@ -190,32 +101,14 @@ d.sort((a,b)=>((a[sortKey]||0)-(b[sortKey]||0))*dir);
 return d;
 }
 
-/* ================= RENDER ================= */
-
 function render(){
-
-let d=getData();
-
-document.getElementById("head").innerHTML=`
+document.getElementById("body").innerHTML =
+getData().map(p=>`
 <tr>
-<th onclick="sort('player')">Player</th>
-<th onclick="sort('team')">Team</th>
-<th onclick="sort('yds')">YDS</th>
-<th onclick="sort('td')">TD</th>
-</tr>`;
-
-document.getElementById("body").innerHTML=
-d.map(p=>`
-<tr>
-<td>
-<div class="player">
-<div class="avatar">${p.player.split(" ").map(x=>x[0]).join("")}</div>
-${p.player}
-</div>
-</td>
+<td>${p.player}</td>
 <td>${p.team}</td>
-<td>${p.yds||"-"}</td>
-<td>${p.td||"-"}</td>
+<td>${p.yds}</td>
+<td>${p.td}</td>
 </tr>
 `).join("");
 }
